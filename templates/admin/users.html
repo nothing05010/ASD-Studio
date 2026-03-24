@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Пользователи — ASD Studio{% endblock %}
+
+{% block content %}
+<section class="admin-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="admin-header" data-animate="fade-up">
+            <div>
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-header__back">
+                    <i class="fas fa-arrow-left"></i> Панель управления
+                </a>
+                <h1 class="admin-header__title">Пользователи</h1>
+            </div>
+            <span class="admin-header__count">{{ users|length }} пользователей</span>
+        </div>
+
+        <!-- Users Table -->
+        {% if users %}
+        <div class="admin-table-wrap" data-animate="fade-up" data-delay="100">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Пользователь</th>
+                        <th>Email</th>
+                        <th>Роль</th>
+                        <th>Отзывов</th>
+                        <th>Дата регистрации</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td><span class="admin-table__id">#{{ user.id }}</span></td>
+                        <td>
+                            <div class="admin-user-cell">
+                                <span class="admin-user-cell__avatar">{{ user.username[:2]|upper }}</span>
+                                <span class="admin-user-cell__name">{{ user.username }}</span>
+                            </div>
+                        </td>
+                        <td><span class="admin-table__email">{{ user.email }}</span></td>
+                        <td>
+                            <span class="admin-role admin-role--{{ user.role }}">
+                                {% if user.role == 'admin' %}⚡ Admin{% else %}👤 Client{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ user.reviews.count() }}</td>
+                        <td><span class="admin-table__date">{{ user.created_at.strftime('%d.%m.%Y %H:%M') }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="admin-empty" data-animate="fade-up" data-delay="100">
+            <span class="admin-empty__icon">👥</span>
+            <p class="admin-empty__text">Пользователи не найдены</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %}Каталог{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-tag">
+      <span class="dot"></span> Принимаем заказы
+    </div>
+
+    <h1>Telegram-боты<br><span class="muted">для вашего бизнеса</span></h1>
+
+    <p class="hero-p">
+      Проектируем и разрабатываем ботов, которые автоматизируют
+      продажи, поддержку и маркетинг. От идеи до продакшна.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#catalog" class="btn btn-white btn-lg">Смотреть каталог</a>
+      <a href="{{ url_for('submit_review') }}" class="btn btn-ghost btn-lg">Оставить отзыв</a>
+    </div>
+
+    <div class="hero-metrics">
+      <div>
+        <span class="metric-val">150+</span>
+        <span class="metric-lbl">Проектов</span>
+      </div>
+      <div>
+        <span class="metric-val">98%</span>
+        <span class="metric-lbl">Результат</span>
+      </div>
+      <div>
+        <span class="metric-val">24/7</span>
+        <span class="metric-lbl">Поддержка</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOG -->
+<section class="section" id="catalog">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">Каталог</div>
+      <h2 class="sec-title">Готовые решения</h2>
+      <p class="sec-sub">Каждый бот адаптируется под ваши задачи</p>
+    </div>
+
+    <div class="bento reveal-stagger reveal">
+      {% for bot in bots %}
+      <div class="card">
+        <div class="card-top">
+          <div class="card-icon">
+            {% if bot.icon == 'cart' %}&#128722;
+            {% elif bot.icon == 'headset' %}&#127911;
+            {% elif bot.icon == 'megaphone' %}&#128227;
+            {% elif bot.icon == 'calendar' %}&#128197;
+            {% elif bot.icon == 'graduation' %}&#127891;
+            {% else %}&#129302;{% endif %}
+          </div>
+          <span class="card-tag">{{ bot.category }}</span>
+        </div>
+        <h3 class="card-name">{{ bot.name }}</h3>
+        <p class="card-desc">{{ bot.description }}</p>
+        <div class="card-foot">
+          <span class="card-price">{{ bot.price_formatted() }} <small>&#8381;</small></span>
+          <a href="https://t.me/" target="_blank" class="btn btn-ghost btn-sm">Заказать &rarr;</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+{% if reviews %}
+<section class="section" id="reviews">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">Отзывы</div>
+      <h2 class="sec-title">Клиенты о нас</h2>
+    </div>
+
+    <div class="reviews-grid reveal-stagger reveal">
+      {% for r in reviews %}
+      <div class="review">
+        <div class="review-stars">
+          {% for i in range(5) %}
+            {% if i < r.rating %}<span class="s-on"></span>{% else %}<span class="s-off"></span>{% endif %}
+          {% endfor %}
+        </div>
+        <p class="review-text">{{ r.text }}</p>
+        <div class="review-who">
+          <div class="review-av">{{ r.author_name[0] }}</div>
+          <div>
+            <div class="review-name">{{ r.author_name }}</div>
+            <div class="review-date">{{ r.created_at.strftime('%d.%m.%Y') if r.created_at else '' }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="text-align:center;margin-top:28px;" class="reveal">
+      <a href="{{ url_for('submit_review') }}" class="btn btn-ghost btn-sm">Написать отзыв</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- FAQ ACCORDION -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-label">FAQ</div>
+      <h2 class="sec-title">Частые вопросы</h2>
+      <p class="sec-sub">Ответы на самые популярные вопросы о наших ботах</p>
+    </div>
+
+    <div style="max-width:640px;margin:0 auto;" class="reveal">
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          Как быстро вы можете разработать бота?
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            <p>Сроки зависят от сложности проекта. Простой бот — от 3 до 5 дней. Бот средней сложности с интеграциями — от 1 до 2 недель. Сложные системы с кастомной логикой — от 2 до 4 недель. Точные сроки обсуждаем после изучения задачи.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          Можно ли адаптировать бота из каталога под мои нужды?
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            <p>Конечно! Все боты из каталога — это отправные точки, которые мы дорабатываем под вашу специфику. Меняем логику, добавляем интеграции, настраиваем под ваши API и бизнес-процессы.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          Какие технологии используются для разработки?
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            <p>Мы используем Python (aiogram, Pyrogram), Node.js (Telegraf, grammY), базы данных PostgreSQL и Redis, облачные сервисы AWS и DigitalOcean. Выбираем стек под задачу, чтобы бот работал быстро и стабильно.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          Предоставляется ли поддержка после запуска?
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            <p>Да, мы предоставляем 30 дней бесплатной поддержки после запуска. Также доступны тарифы на расширенную поддержку: мониторинг, оперативное устранение багов, обновления и доработки по мере роста проекта.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-trigger">
+          Как происходит оплата?
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            <p>Работаем по предоплате 50% перед началом разработки. Оставшиеся 50% — после успешного тестирования и приёмки. Принимаем переводы на карту, криптовалюту и оплату через юр. лицо.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

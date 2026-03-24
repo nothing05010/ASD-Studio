@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Отзыв{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="form-shell" style="padding:64px 0;">
+    <div class="form-box">
+      <h1 class="form-h">Оставить отзыв</h1>
+      <p class="form-sub">Расскажите о работе с нами</p>
+
+      <form method="POST" action="{{ url_for('submit_review') }}">
+        <div class="field">
+          <label class="field-lbl" for="author_name">Имя</label>
+          <input type="text" id="author_name" name="author_name" class="field-input"
+                 placeholder="Ваше имя" required
+                 value="{{ current_user.username if current_user.is_authenticated else '' }}">
+        </div>
+
+        <div class="field">
+          <label class="field-lbl">Оценка</label>
+          <div class="star-input">
+            <input type="radio" id="s5" name="rating" value="5" checked>
+            <label for="s5"></label>
+            <input type="radio" id="s4" name="rating" value="4">
+            <label for="s4"></label>
+            <input type="radio" id="s3" name="rating" value="3">
+            <label for="s3"></label>
+            <input type="radio" id="s2" name="rating" value="2">
+            <label for="s2"></label>
+            <input type="radio" id="s1" name="rating" value="1">
+            <label for="s1"></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-lbl" for="text">Отзыв</label>
+          <textarea id="text" name="text" class="field-textarea"
+                    placeholder="Минимум 10 символов" required minlength="10"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-white btn-block" style="margin-top:4px;">Отправить</button>
+      </form>
+
+      <p class="form-footer" style="font-size:12px;color:var(--gray-3);">
+        Публикуется после модерации
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

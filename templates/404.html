@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}404 — Страница не найдена | ASD Studio{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <div class="container">
+        <div class="error-page__content" data-animate="fade-up">
+            <span class="error-page__code">404</span>
+            <h1 class="error-page__title">Страница не найдена</h1>
+            <p class="error-page__text">Похоже, этот маршрут ещё не запрограммирован. Но мы можем это исправить!</p>
+            <a href="{{ url_for('index') }}" class="btn btn--primary btn--lg">
+                <span>Вернуться на главную</span>
+                <i class="fas fa-home"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

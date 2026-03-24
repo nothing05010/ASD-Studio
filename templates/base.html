@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ASD — профессиональная разработка Telegram-ботов для бизнеса.">
+  <title>{% block title %}ASD{% endblock %} — Telegram Bot Development</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <header class="header" id="siteHeader">
+    <div class="header-inner">
+      <a href="{{ url_for('index') }}" class="logo">
+        <span class="logo-mark">A</span>
+        <span>ASD</span>
+        <span class="logo-sep">/</span>
+        <span class="logo-sub">Telegram Bots</span>
+      </a>
+
+      <button class="burger" id="burger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <ul class="nav" id="nav">
+        <li><a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">Каталог</a></li>
+        <li><a href="{{ url_for('submit_review') }}" class="{% if request.endpoint == 'submit_review' %}active{% endif %}">Отзыв</a></li>
+        {% if current_user.is_authenticated %}
+          {% if current_user.is_admin %}
+            <li><a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint and 'admin' in request.endpoint %}active{% endif %}">Панель{% if pending_count %}<span class="nav-badge">{{ pending_count }}</span>{% endif %}</a></li>
+          {% endif %}
+          <li><a href="{{ url_for('logout') }}">Выйти</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}" class="nav-cta">Войти</a></li>
+        {% endif %}
+        <li>
+          <button class="kbd-hint" id="cmdKTrigger" aria-label="Search">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <span>⌘K</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ═══ COMMAND PALETTE ═══ -->
+  <div class="cmd-palette-overlay" id="cmdPalette">
+    <div class="cmd-palette">
+      <div class="cmd-search-wrap">
+        <svg class="cmd-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="cmd-search-input" id="cmdSearchInput" type="text" placeholder="Поиск страниц и действий..." autocomplete="off" spellcheck="false">
+        <span class="cmd-esc">ESC</span>
+      </div>
+
+      <div class="cmd-group-label">Навигация</div>
+      <div class="cmd-list" id="cmdList">
+        <a href="{{ url_for('index') }}" class="cmd-item" data-search="главная каталог боты home catalog">
+          <div class="cmd-item-icon">🏠</div>
+          <div class="cmd-item-text">
+            <div class="cmd-item-title">Главная</div>
+            <div class="cmd-item-sub">Каталог ботов и обзор</div>
+          </div>
+        </a>
+        <a href="{{ url_for('index') }}#catalog" class="cmd-item" data-search="каталог боты catalog bots products">
+          <div class="cmd-item-icon">🤖</div>
+          <div class="cmd-item-text">
+            <div class="cmd-item-title">Каталог ботов</div>
+            <div class="cmd-item-sub">Все готовые решения</div>
+          </div>
+        </a>
+        <a href="{{ url_for('index') }}#reviews" class="cmd-item" data-search="отзывы reviews feedback">
+          <div class="cmd-item-icon">⭐</div>
+          <div class="cmd-item-text">
+            <div class="cmd-item-title">Отзывы</div>
+            <div class="cmd-item-sub">Клиенты о нас</div>
+          </div>
+        </a>
+        <a href="{{ url_for('submit_review') }}" class="cmd-item" data-search="написать отзыв оставить review write">
+          <div class="cmd-item-icon">✍️</div>
+          <div class="cmd-item-text">
+            <div class="cmd-item-title">Написать отзыв</div>
+            <div class="cmd-item-sub">Оставить обратную связь</div>
+          </div>
+        </a>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+        <a href="{{ url_for('admin_dashboard') }}" class="cmd-item" data-search="админ панель dashboard admin">
+          <div class="cmd-item-icon">⚙️</div>
+          <div class="cmd-item-text">
+            <div class="cmd-item-title">Панель администратора</div>
+            <div class="cmd-item-sub">Управление ботами и отзывами</div>
+          </div>
+        </a>
+        {% endif %}
+        <a href="https://t.me/" target="_blank" class="cmd-item" data-search="telegram контакт связь contact">
+          <div class="cmd-item-icon">💬</div>
+          <div class="cmd-item-text">
+            <div class="cmd-item-title">Telegram</div>
+            <div class="cmd-item-sub">Связаться с нами</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="cmd-footer">
+        <div class="cmd-footer-hint">
+          <span>↑↓ навигация</span>
+          <span>↵ открыть</span>
+        </div>
+        <span>ESC закрыть</span>
+      </div>
+    </div>
+  </div>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% if msgs %}
+      <div class="toasts" id="toasts">
+        {% for cat, msg in msgs %}
+          <div class="toast {{ cat }}">
+            <span>{{ msg }}</span>
+            <button class="toast-x" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <span class="footer-copy">&copy; {{ current_year }} ASD Studio</span>
+        <ul class="footer-nav">
+          <li><a href="{{ url_for('index') }}">Каталог</a></li>
+          <li><a href="{{ url_for('submit_review') }}">Отзыв</a></li>
+          <li><a href="https://t.me/" target="_blank">Telegram</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ─── Burger Menu ───
+    document.getElementById('burger')?.addEventListener('click', () =>
+      document.getElementById('nav').classList.toggle('open'));
+
+    // ─── Scroll Reveal (IntersectionObserver) ───
+    const io = new IntersectionObserver(es =>
+      es.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }),
+      { threshold: .1 });
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
+
+    // ─── Card glow follows cursor ───
+    document.querySelectorAll('.card').forEach(c => {
+      c.addEventListener('mousemove', e => {
+        const r = c.getBoundingClientRect();
+        c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+
+    // ─── Auto-dismiss toasts ───
+    setTimeout(() => {
+      const t = document.getElementById('toasts');
+      if (t) { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }
+    }, 4500);
+
+
+    // ═══════════════════════════════════════════
+    //  FLOATING ISLAND HEADER
+    // ═══════════════════════════════════════════
+    (() => {
+      const header = document.getElementById('siteHeader');
+      if (!header) return;
+      let lastY = 0;
+      const THRESHOLD = 120;
+
+      window.addEventListener('scroll', () => {
+        const y = window.scrollY;
+        if (y > THRESHOLD) {
+          header.classList.add('island');
+        } else {
+          header.classList.remove('island');
+        }
+        lastY = y;
+      }, { passive: true });
+    })();
+
+
+    // ═══════════════════════════════════════════
+    //  COMMAND PALETTE (Cmd+K / Ctrl+K)
+    // ═══════════════════════════════════════════
+    (() => {
+      const overlay  = document.getElementById('cmdPalette');
+      const input    = document.getElementById('cmdSearchInput');
+      const list     = document.getElementById('cmdList');
+      const trigger  = document.getElementById('cmdKTrigger');
+      if (!overlay || !input || !list) return;
+
+      let activeIdx = 0;
+
+      function getVisibleItems() {
+        return [...list.querySelectorAll('.cmd-item:not(.hidden)')];
+      }
+
+      function setActive(idx) {
+        const items = getVisibleItems();
+        items.forEach(it => it.classList.remove('active'));
+        if (items[idx]) {
+          items[idx].classList.add('active');
+          items[idx].scrollIntoView({ block: 'nearest' });
+          activeIdx = idx;
+        }
+      }
+
+      function openPalette() {
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        input.value = '';
+        filterItems('');
+        setTimeout(() => {
+          input.focus();
+          setActive(0);
+        }, 60);
+      }
+
+      function closePalette() {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        input.blur();
+      }
+
+      function filterItems(query) {
+        const q = query.toLowerCase().trim();
+        const items = list.querySelectorAll('.cmd-item');
+        items.forEach(item => {
+          const searchData = (item.dataset.search || '') + ' ' +
+                             (item.querySelector('.cmd-item-title')?.textContent || '');
+          const match = !q || searchData.toLowerCase().includes(q);
+          item.classList.toggle('hidden', !match);
+        });
+        activeIdx = 0;
+        setActive(0);
+      }
+
+      // Keyboard shortcut: Cmd+K / Ctrl+K
+      document.addEventListener('keydown', e => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          if (overlay.classList.contains('open')) {
+            closePalette();
+          } else {
+            openPalette();
+          }
+        }
+
+        if (!overlay.classList.contains('open')) return;
+
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closePalette();
+        }
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const items = getVisibleItems();
+          setActive((activeIdx + 1) % items.length);
+        }
+
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const items = getVisibleItems();
+          setActive((activeIdx - 1 + items.length) % items.length);
+        }
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const items = getVisibleItems();
+          if (items[activeIdx]) items[activeIdx].click();
+          closePalette();
+        }
+      });
+
+      // Trigger button click
+      if (trigger) trigger.addEventListener('click', openPalette);
+
+      // Close on overlay click
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) closePalette();
+      });
+
+      // Filter on typing
+      input.addEventListener('input', () => filterItems(input.value));
+    })();
+
+
+    // ═══════════════════════════════════════════
+    //  ACCORDION — spring animations
+    // ═══════════════════════════════════════════
+    document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const item = trigger.closest('.accordion-item');
+        if (!item) return;
+
+        // Close siblings (single-open mode)
+        const siblings = item.parentElement?.querySelectorAll('.accordion-item');
+        siblings?.forEach(sib => {
+          if (sib !== item) sib.classList.remove('open');
+        });
+
+        item.classList.toggle('open');
+      });
+    });
+
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

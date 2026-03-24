@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Модерация отзывов — ASD Studio{% endblock %}
+
+{% block content %}
+<section class="admin-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="admin-header" data-animate="fade-up">
+            <div>
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-header__back">
+                    <i class="fas fa-arrow-left"></i> Панель управления
+                </a>
+                <h1 class="admin-header__title">Модерация отзывов</h1>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="admin-filters" data-animate="fade-up" data-delay="100">
+            <a href="{{ url_for('admin_reviews') }}"
+               class="admin-filter {% if status_filter == 'all' %}admin-filter--active{% endif %}">
+                Все
+            </a>
+            <a href="{{ url_for('admin_reviews', status='pending') }}"
+               class="admin-filter {% if status_filter == 'pending' %}admin-filter--active{% endif %}">
+                ⏳ На модерации
+            </a>
+            <a href="{{ url_for('admin_reviews', status='approved') }}"
+               class="admin-filter {% if status_filter == 'approved' %}admin-filter--active{% endif %}">
+                ✓ Одобренные
+            </a>
+            <a href="{{ url_for('admin_reviews', status='rejected') }}"
+               class="admin-filter {% if status_filter == 'rejected' %}admin-filter--active{% endif %}">
+                ✕ Отклонённые
+            </a>
+        </div>
+
+        <!-- Reviews List -->
+        {% if reviews %}
+        <div class="admin-reviews-list" data-animate="fade-up" data-delay="200">
+            {% for review in reviews %}
+            <div class="admin-review-card admin-review-card--{{ review.status }}">
+                <div class="admin-review-card__header">
+                    <div class="admin-review-card__author">
+                        <span class="admin-user-cell__avatar">{{ review.author.username[:2]|upper }}</span>
+                        <div>
+                            <span class="admin-review-card__name">{{ review.author.username }}</span>
+                            <span class="admin-review-card__email">{{ review.author.email }}</span>
+                        </div>
+                    </div>
+                    <div class="admin-review-card__meta">
+                        <span class="admin-review-card__status admin-status--{{ review.status }}">
+                            {% if review.status == 'pending' %}⏳ На модерации
+                            {% elif review.status == 'approved' %}✓ Одобрен
+                            {% elif review.status == 'rejected' %}✕ Отклонён{% endif %}
+                        </span>
+                        <span class="admin-review-card__date">{{ review.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                    </div>
+                </div>
+
+                <div class="admin-review-card__body">
+                    <div class="admin-review-card__stars">{{ review.stars }}</div>
+                    {% if review.bot_item %}
+                    <span class="admin-review-card__bot">{{ review.bot_item.icon }} {{ review.bot_item.title }}</span>
+                    {% endif %}
+                    <p class="admin-review-card__text">"{{ review.text }}"</p>
+                </div>
+
+                <div class="admin-review-card__footer">
+                    {% if review.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('admin_approve_review', review_id=review.id) }}">
+                        <button type="submit" class="btn btn--sm btn--approve">✓ Одобрить</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin_reject_review', review_id=review.id) }}">
+                        <button type="submit" class="btn btn--sm btn--reject">✕ Отклонить</button>
+                    </form>
+                    {% elif review.status == 'rejected' %}
+                    <form method="POST" action="{{ url_for('admin_approve_review', review_id=review.id) }}">
+                        <button type="submit" class="btn btn--sm btn--approve">✓ Одобрить</button>
+                    </form>
+                    {% elif review.status == 'approved' %}
+                    <form method="POST" action="{{ url_for('admin_reject_review', review_id=review.id) }}">
+                        <button type="submit" class="btn btn--sm btn--reject">✕ Отклонить</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('admin_delete_review', review_id=review.id) }}"
+                          onsubmit="return confirm('Удалить отзыв навсегда?')">
+                        <button type="submit" class="btn btn--sm btn--delete">🗑 Удалить</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="admin-empty" data-animate="fade-up" data-delay="200">
+            <span class="admin-empty__icon">📭</span>
+            <p class="admin-empty__text">
+                {% if status_filter == 'pending' %}Нет отзывов на модерации
+                {% elif status_filter == 'approved' %}Нет одобренных отзывов
+                {% elif status_filter == 'rejected' %}Нет отклонённых отзывов
+                {% else %}Отзывов пока нет{% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

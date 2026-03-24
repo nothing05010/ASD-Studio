@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}{{ bot.name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding:64px 0;">
+  <div style="max-width:600px;margin:0 auto;">
+    <a href="{{ url_for('index') }}#catalog" class="btn btn-ghost btn-sm" style="margin-bottom:24px;">&larr; Каталог</a>
+
+    <div style="border:var(--border);border-radius:var(--r-lg);padding:28px;background:var(--bg-raised);">
+      <div class="card-top">
+        <div class="card-icon" style="width:48px;height:48px;font-size:24px;">
+          {% if bot.icon == 'cart' %}&#128722;
+          {% elif bot.icon == 'headset' %}&#127911;
+          {% elif bot.icon == 'megaphone' %}&#128227;
+          {% elif bot.icon == 'calendar' %}&#128197;
+          {% elif bot.icon == 'graduation' %}&#127891;
+          {% else %}&#129302;{% endif %}
+        </div>
+        <span class="card-tag">{{ bot.category }}</span>
+      </div>
+
+      <h1 style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin:16px 0 12px;">{{ bot.name }}</h1>
+      <p style="font-size:14px;color:var(--gray-1);line-height:1.7;margin-bottom:24px;">{{ bot.description }}</p>
+
+      <div class="card-foot">
+        <span class="card-price" style="font-size:20px;">{{ bot.price_formatted() }} <small>&#8381;</small></span>
+        <a href="https://t.me/" target="_blank" class="btn btn-white btn-sm">Заказать &rarr;</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

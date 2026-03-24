@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="form-shell" style="padding:64px 0;">
+    <div class="form-box">
+      <h1 class="form-h">Вход</h1>
+      <p class="form-sub">Войдите в свой аккаунт</p>
+
+      <form method="POST" action="{{ url_for('login') }}">
+        <div class="field">
+          <label class="field-lbl" for="username">Логин</label>
+          <input type="text" id="username" name="username" class="field-input"
+                 placeholder="username" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label class="field-lbl" for="password">Пароль</label>
+          <input type="password" id="password" name="password" class="field-input"
+                 placeholder="password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-white btn-block" style="margin-top:4px;">Войти</button>
+      </form>
+
+      <p class="form-footer">Нет аккаунта? <a href="{{ url_for('register') }}">Регистрация</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
